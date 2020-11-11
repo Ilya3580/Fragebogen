@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "282965792311",
+    "firebase_url": "https://fragebogen-91009.firebaseio.com",
+    "project_id": "fragebogen-91009",
+    "storage_bucket": "fragebogen-91009.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:282965792311:android:0732c49d9849be02af51b2",
+        "android_client_info": {
+          "package_name": "com.example.fragebogen"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "282965792311-9fhftarub3cb800qhtcis61ckjm65d98.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqGQaWjcQ0ECBO8C3lxh8uPnDX43cOdeY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "282965792311-9fhftarub3cb800qhtcis61ckjm65d98.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
