@@ -78,7 +78,10 @@ class MainActivity : AppCompatActivity() {
             {
                 Toast.makeText(this, "Введенное число слишком большое", Toast.LENGTH_LONG).show()
                 alertDialog()
-            }else {
+            }else if(count<1){
+                Toast.makeText(this, "Введенное число слишком маленькое", Toast.LENGTH_LONG).show()
+                alertDialog()
+            }else{
                 container.removeAllViews()
                 generateFragment()
             }
