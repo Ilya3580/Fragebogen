@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var container:LinearLayout
     private lateinit var button:Button
     private lateinit var fragment:FragmentList
-    private lateinit var questions:ArrayList<ArrayList<String>>
+    private lateinit var questions:ArrayList<ArrayList<ObjectQuestions>>
     private var count:Int = 0
     private var block= false
     private var flagEnd = true
@@ -97,7 +97,7 @@ class MainActivity : AppCompatActivity() {
     private fun generateList() {
         myRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-
+                questions.clear()
                 for (ds in dataSnapshot.children) {
                     val arrayList = ArrayList<String>()
                     for (dsChild in ds.children) {
@@ -115,7 +115,7 @@ class MainActivity : AppCompatActivity() {
                         if(flagIter)
                         {
                             arrayList.add("Проверить")
-                            questions.add(arrayList)
+                            questions.add(convertListObjectQuestion(arrayList))
                         }
                     }
                 }
@@ -142,11 +142,8 @@ class MainActivity : AppCompatActivity() {
             return true
         }
         wifiInfo = cm.activeNetworkInfo
-        return if (wifiInfo != null && wifiInfo.isConnected) {
-            true
-        } else false
+        return wifiInfo != null && wifiInfo.isConnected
     }
-
     override fun onBackPressed() {
         if(flagEnd) {
             super.onBackPressed()
@@ -165,6 +162,28 @@ class MainActivity : AppCompatActivity() {
 
         }
         builder.show()
+    }
+    private fun convertListObjectQuestion(lst:ArrayList<String>) : ArrayList<ObjectQuestions>
+    {
+        var mas:ArrayList<ObjectQuestions> = ArrayList()
+        var flag = false
+        for(n in lst)
+        {
+            if(n[0] == '+')
+            {
+                flag = true
+                break
+            }
+        }
+        for(n in (0 until lst.size))
+        {
+            if(n == 0 || n==lst.size-1) {
+                mas.add(ObjectQuestions(lst[n], false))
+            }else{
+                mas.add(ObjectQuestions(lst[n], !flag))
+            }
+        }
+        return mas
     }
 
 }
