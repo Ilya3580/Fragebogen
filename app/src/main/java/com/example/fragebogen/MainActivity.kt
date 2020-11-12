@@ -6,7 +6,9 @@ import android.net.ConnectivityManager
 import android.os.Bundle
 import android.text.InputType
 import android.util.Log
+import android.view.View
 import android.widget.*
+import android.widget.RelativeLayout
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.database.*
@@ -23,6 +25,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var button:Button
     private lateinit var fragment:FragmentList
     private lateinit var questions:ArrayList<ArrayList<ObjectQuestions>>
+    private lateinit var progressBar:ProgressBar
     private var count:Int = 0
     private var block= false
     private var flagEnd = true
@@ -40,7 +43,9 @@ class MainActivity : AppCompatActivity() {
         addButtonStart()
         button.setOnClickListener {
             if(hasConnection()) {
-
+                button.visibility = View.GONE
+                progressBar = findViewById(R.id.progressBar)
+                progressBar.visibility = View.VISIBLE
                 generateList()
             }else{
                 Toast.makeText(this, "Нет подключения к интернету", Toast.LENGTH_LONG).show()
@@ -67,6 +72,8 @@ class MainActivity : AppCompatActivity() {
         container.addView(button)
     }
     private fun alertDialog() {
+        progressBar.visibility = View.GONE
+        button.visibility = View.VISIBLE
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Введите количество вопросов")
         val input = EditText(this)
