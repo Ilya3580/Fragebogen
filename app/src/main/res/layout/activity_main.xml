@@ -24,15 +24,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Введите ключ" />
-    <EditText
-        android:layout_gravity="center"
-        android:textColor="#000000"
-        android:paddingLeft="20dp"
-        android:textSize="30sp"
-        android:id="@+id/editTextQuestion"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Введите количество вопросов" />
     <Button
         android:layout_gravity="center"
         android:textColor="#FFFFFF"
@@ -41,7 +32,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/round_corner_orange"
-        android:text="начать" />
+        android:text="продолжить" />
     <ProgressBar
         android:visibility="gone"
         android:id="@+id/progressBar"

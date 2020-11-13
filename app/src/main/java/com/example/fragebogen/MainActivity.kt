@@ -4,17 +4,18 @@ import android.app.Activity
 import android.content.Context
 import android.net.ConnectivityManager
 import android.os.Bundle
-import android.provider.Settings
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.marginBottom
+import androidx.core.view.marginTop
 import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import java.lang.Exception
 
 
 class MainActivity : AppCompatActivity() {
@@ -25,13 +26,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var container:LinearLayout
     private lateinit var button:Button
     private lateinit var editTextKey: EditText
-    private lateinit var editTextQuestion: EditText
     private lateinit var textView:TextView
     private lateinit var fragment:FragmentList
     private lateinit var questions:ArrayList<ArrayList<ObjectQuestions>>
     private lateinit var progressBar:ProgressBar
-    private var count:Int = 0
+    private lateinit var globalStudent:StudentClass
     private var block= false
+    private var blockKey = false
     private var flagEnd = true
     private var masterKey = ""
     private var key = ""
@@ -43,7 +44,7 @@ class MainActivity : AppCompatActivity() {
         questions = ArrayList()
         button = findViewById(R.id.button)
         editTextKey = findViewById(R.id.editTextKey)
-        editTextQuestion = findViewById(R.id.editTextQuestion)
+        progressBar = findViewById(R.id.progressBar)
         textView = findViewById(R.id.textView)
 
         dataBase = Firebase.database
@@ -52,13 +53,7 @@ class MainActivity : AppCompatActivity() {
         button.setOnClickListener {
             if(hasConnection()) {
                 block = false
-                textView.visibility = View.GONE
-                button.visibility = View.GONE
-                editTextQuestion.visibility = View.GONE
-                editTextKey.visibility = View.GONE
-                progressBar = findViewById(R.id.progressBar)
-                progressBar.visibility = View.VISIBLE
-
+                progressBarStart()
                 generateList()
             }else{
                 Toast.makeText(this, "Нет подключения к интернету", Toast.LENGTH_LONG).show()
@@ -67,100 +62,84 @@ class MainActivity : AppCompatActivity() {
 
 
     }
-
-    private fun pressButton(lst:ArrayList<String>)
+    private fun progressBarStart()
     {
-
+        textView.visibility = View.GONE
+        button.visibility = View.GONE
+        editTextKey.visibility = View.GONE
+        progressBar.visibility = View.VISIBLE
+    }
+    private fun progressBarStop()
+    {
+        textView.visibility = View.VISIBLE
+        button.visibility = View.VISIBLE
+        editTextKey.visibility = View.VISIBLE
+        progressBar.visibility = View.GONE
+    }
+    private fun pressButton()
+    {
         val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(editTextKey.windowToken, 0)
-        inputMethodManager.hideSoftInputFromWindow(editTextQuestion.windowToken, 0)
-        button.visibility = View.GONE
-        editTextQuestion.visibility = View.GONE
-        editTextKey.visibility = View.GONE
-        progressBar.visibility = View.GONE
+        var myKey = editTextKey.text.toString()
 
-        if(editTextQuestion.text.toString() == "")
-        {
-            alertDialogKey("Ввены не все данные")
-
-        }else {
-            var tryFlag = true
-            try {
-                count = editTextQuestion.text.toString().toInt()
-            }catch (e:Exception)
-            {
-                tryFlag = false
-            }
-            if(tryFlag) {
-                if (count > questions.count() || count > 10) {
-                    alertDialogKey("Введенное число слишком большое")
-                } else if (count < 1) {
-                    alertDialogKey("Введенное число слишком маленькое")
-                } else {
-                    var myKey = editTextKey.text.toString()
-                    if (key == myKey || myKey == masterKey) {
-                        if (checkId(lst, myKey == masterKey)) {
-                            container.removeAllViews()
-                            generateFragment()
-                        }
-                    } else {
-                        alertDialogKey("Введеный ключ не верный! Попробуйте еще раз")
-                    }
-                }
-            }else{
-                alertDialogKey("Введены не верные данные")
-            }
+        if (myKey == masterKey) {
+            generateFragment()
+        }else{
+            progressBarStart()
+            checkKey()
         }
-
     }
 
     private fun generateFragment() {
-        fragment = FragmentList.newInstance(questions, count, this)
-        supportFragmentManager.beginTransaction().replace(R.id.container, fragment).commit()
-        flagEnd = false
+        progressBarStop()
+        textView.visibility = View.GONE
+        editTextKey.visibility = View.GONE
+        var param = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.MATCH_PARENT
+        )
+        param.setMargins(50,50,50,50)
+        button.layoutParams = param
+        button.text = "начать"
+        button.setOnClickListener {
+            container.removeAllViews()
+            fragment = FragmentList.newInstance(questions, questions.size, this, globalStudent)
+            supportFragmentManager.beginTransaction().replace(R.id.container, fragment).commit()
+            flagEnd = false
+        }
+
     }
     private fun generateList() {
         myRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 questions.clear()
-                var lstA = ArrayList<String>()
                 for (ds in dataSnapshot.children) {
                     if(ds.key == "masterKey")
                     {
                         masterKey = ds.value.toString()
                     }
-                    if(ds.key == "key"){
+                    if(ds.key != "students") {
+                        val arrayList = ArrayList<String>()
                         for (dsChild in ds.children) {
-                            if(dsChild.key.toString() == "key")
-                            {
-                                key = dsChild.value.toString()
-                            }else {
-                                lstA.add(dsChild.value.toString())
+                            var flagIter = false
+                            var flag = true
+                            for (dsChildChild in dsChild.children) {
+                                arrayList.add(dsChildChild.value.toString())
+                                flag = false
+                                flagIter = true
                             }
-                        }
-                    }
-                    val arrayList = ArrayList<String>()
-                    for (dsChild in ds.children) {
-                        var flagIter = false
-                        var flag = true
-                        for (dsChildChild in dsChild.children) {
-                            arrayList.add(dsChildChild.value.toString())
-                            flag = false
-                            flagIter = true
-                        }
-                        if(flag)
-                        {
-                            arrayList.add(0,dsChild.value.toString())
-                        }
-                        if(flagIter)
-                        {
-                            arrayList.add("Проверить")
-                            questions.add(convertListObjectQuestion(arrayList))
+                            if (flag) {
+                                arrayList.add(0, dsChild.value.toString())
+                            }
+                            if (flagIter) {
+                                arrayList.add("Проверить")
+                                questions.add(convertListObjectQuestion(arrayList))
+                            }
                         }
                     }
                 }
                 if(!block) {
-                    pressButton(lstA)
+                    pressButton()
                     block = true
                 }
 
@@ -225,36 +204,53 @@ class MainActivity : AppCompatActivity() {
         }
         return mas
     }
-    private fun checkId(lst:ArrayList<String>, flagMasterKey:Boolean):Boolean {
-        if(flagMasterKey)
-        {
-            return true
-        }
-        var flagId = true
-        val ANDROID_ID: String = Settings.Secure.getString(
+    private fun checkKey(){
+        myRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if(!blockKey) {
+                    for (ds in dataSnapshot.children) {
+                        if (ds.key == "students") {
+                            for (dsChild in ds.children) {
+                                var student: StudentClass
+                                var mas = ArrayList<String>()
+                                for (dsChilChild in dsChild.children) {
+                                    mas.add(dsChilChild.value.toString())
+                                }
+                                student = StudentClass(mas[0], mas[1], mas[2])
+                                if (student.key == editTextKey.text.toString() && student.key[0] != '+') {
+                                    globalStudent = student
+                                    student.key = "+" + student.key
+                                    myRef.child("students").child(student.surname).setValue(student)
+                                    blockKey = true
+                                    generateFragment()
+                                } else if (student.key == "+" + editTextKey.text.toString() && student.key[0] == '+') {
+                                    alertDialog("Данный ключ уже использовали")
+                                    return
+                                }
+                            }
+                            if(!blockKey)
+                                alertDialog("Ключ не найден")
+                        }
+                    }
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {
+                Log.w("TAGA", "Failed to read value.", error.toException())
+            }
+        })
+
+
+
+        /*val ANDROID_ID: String = Settings.Secure.getString(
             applicationContext.contentResolver,
             Settings.Secure.ANDROID_ID
-        )
-        for(n in lst)
-        {
-            if(n == ANDROID_ID)
-            {
-                flagId = false
-                break
-            }
-        }
-        if(flagId) {
-            myRef.child("key").child(ANDROID_ID).setValue(ANDROID_ID)
-            return true
-        }else{
-            alertDialogKey("Вы использовали данный ключ")
-            return false
-        }
+        )*/
+
+
     }
-    private fun alertDialogKey(text:String) {
+    private fun alertDialog(text:String) {
         textView.visibility = View.VISIBLE
         button.visibility = View.VISIBLE
-        editTextQuestion.visibility = View.VISIBLE
         editTextKey.visibility = View.VISIBLE
         progressBar.visibility = View.GONE
         val builder = AlertDialog.Builder(this)

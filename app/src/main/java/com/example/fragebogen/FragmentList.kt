@@ -13,15 +13,20 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.get
 import androidx.fragment.app.Fragment
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 
 
-class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, private var count:Int, private var contextA:Context) : Fragment() {
+class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, private var count:Int, private var contextA:Context, private var student:StudentClass) : Fragment() {
 
     companion object {
-        fun newInstance(mas:ArrayList<ArrayList<ObjectQuestions>>, count: Int,contextA:Context) = FragmentList(mas, count,contextA)
+        fun newInstance(mas:ArrayList<ArrayList<ObjectQuestions>>, count: Int,contextA:Context, student:StudentClass) = FragmentList(mas, count,contextA, student)
 
     }
-
+    private lateinit var dataBase: FirebaseDatabase
+    private lateinit var myRef: DatabaseReference
     private lateinit var masRandom:Array<Int>
     private lateinit var listView: ListView
     private lateinit var textView:TextView
@@ -35,6 +40,8 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         var view =  inflater.inflate(R.layout.fragment_list_fragment, container, false)
 
+        dataBase = Firebase.database
+        myRef = dataBase.reference
         listView = view.findViewById(R.id.listView)
         textView = view.findViewById(R.id.textViewResult)
         textAuthors = view.findViewById(R.id.textAuthors)
@@ -104,6 +111,8 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
     }
 
     private fun showResult() {
+        student.result="${countTrueAnswer} из ${count}"
+        myRef.child("students").child(student.surname).setValue(student)
         listView.visibility = View.GONE
         textView.visibility = View.VISIBLE
         textAuthors.visibility = View.VISIBLE
