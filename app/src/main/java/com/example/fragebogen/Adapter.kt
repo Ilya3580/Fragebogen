@@ -13,6 +13,7 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.marginBottom
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import java.util.*
@@ -68,6 +69,7 @@ class Adapter(items:ArrayList<ObjectQuestions>, context: Context)
             textView.setTextColor(Color.WHITE)
             textView.setPadding(0,30,0,30)
             textView.textSize = 30F
+
         }
         if(position == 0)
         {
