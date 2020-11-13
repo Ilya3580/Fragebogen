@@ -23,6 +23,7 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
     private lateinit var masRandom:Array<Int>
     private lateinit var listView: ListView
     private lateinit var textView:TextView
+    private lateinit var textAuthors:TextView
     private var idMasRandom = 0
     private lateinit var booleanMas:Array<Boolean>
     private var blockButtons = false
@@ -34,6 +35,7 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
 
         listView = view.findViewById(R.id.listView)
         textView = view.findViewById(R.id.textViewResult)
+        textAuthors = view.findViewById(R.id.textAuthors)
         masRandom = Array(mas.count(), {i->-1})
 
 
@@ -44,38 +46,35 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
 
     private fun generateListView()
     {
-        if(idMasRandom == mas.size)
+        if(idMasRandom == count)
         {
             showResult()
-            return
-        }
-        i = masRandom[idMasRandom]
-        blockButtons = false
-        listView.adapter = Adapter(mas[i], contextA)
-        booleanMas = Array(mas[i].count(), {i->false})
-        listView.setOnItemClickListener{parent, view, position, id ->
-            if(position == listView.count-1)
-            {
-                if(blockButtons)
-                {
-                    idMasRandom++
-                    generateListView()
-                }else{
-                    val textView = view.findViewById<TextView>(R.id.textView)
-                    textView.text = "Далее"
-                    blockButtons = true
-                    checkAnswer(mas[i].count() != 3)
-                }
+        }else {
+            i = masRandom[idMasRandom]
+            blockButtons = false
+            listView.adapter = Adapter(mas[i], contextA)
+            booleanMas = Array(mas[i].count(), { i -> false })
+            listView.setOnItemClickListener { parent, view, position, id ->
+                if (position == listView.count - 1) {
+                    if (blockButtons) {
+                        idMasRandom++
+                        generateListView()
+                    } else {
+                        val textView = view.findViewById<TextView>(R.id.textView)
+                        textView.text = "Далее"
+                        blockButtons = true
+                        checkAnswer(mas[i].count() != 3)
+                    }
 
 
-            }else if (!blockButtons && position !=0 && mas[i].count() != 3){
-                if(booleanMas[position])
-                {
-                    view.background = contextA.getDrawable(R.drawable.round_corner)
-                    booleanMas[position] = false
-                }else{
-                    view.background = contextA.getDrawable(R.drawable.round_corner_orange)
-                    booleanMas[position] = true
+                } else if (!blockButtons && position != 0 && mas[i].count() != 3) {
+                    if (booleanMas[position]) {
+                        view.background = contextA.getDrawable(R.drawable.round_corner)
+                        booleanMas[position] = false
+                    } else {
+                        view.background = contextA.getDrawable(R.drawable.round_corner_orange)
+                        booleanMas[position] = true
+                    }
                 }
             }
         }
@@ -85,6 +84,7 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
     private fun showResult() {
         listView.visibility = View.GONE
         textView.visibility = View.VISIBLE
+        textAuthors.visibility = View.VISIBLE
         textView.text = "Ваш резульат: ${countTrueAnswer} из ${mas.count()}"
     }
 
@@ -161,7 +161,6 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
             }
             i++
         }
-
     }
 
     fun getViewByPosition(pos: Int, listView: ListView): View? {

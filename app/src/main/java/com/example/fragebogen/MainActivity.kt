@@ -36,7 +36,6 @@ class MainActivity : AppCompatActivity() {
 
         container = findViewById(R.id.container)
         questions = ArrayList()
-
         dataBase = Firebase.database
         myRef = dataBase.reference
 

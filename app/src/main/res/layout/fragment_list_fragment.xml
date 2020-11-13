@@ -19,6 +19,8 @@
         android:layout_height="wrap_content"
         android:textAlignment="center"
         android:textSize="20sp"
+        android:focusableInTouchMode="false"
+        android:isScrollContainer="false"
         android:text="Hello" />
     <TextView
         android:visibility="gone"
@@ -28,7 +30,20 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:textSize="50sp"
-        android:text="Ваш результат: 2 из 2 "
+        android:textColor="#FFFFFF"
+        android:background="@color/colorOrange"
+        android:layout_weight="1"
+
+        />
+    <TextView
+        android:visibility="gone"
+        android:divider="#FFFFFF"
+        android:id="@+id/textAuthors"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textSize="10sp"
+        android:text="Разработчик: Илья Сметанин\nТестировщик: Арнаутова Алиса"
         android:textColor="#FFFFFF"
         android:background="@color/colorOrange"
 
