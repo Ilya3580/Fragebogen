@@ -143,7 +143,7 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
                     trueAnswer +=", "
                 }
 
-                if(editText?.text.toString().toLowerCase() == mas[i][j].editText)
+                if(editText?.text.toString() == mas[i][j].editText)
                 {
                     flagAnswer = true
                     break
