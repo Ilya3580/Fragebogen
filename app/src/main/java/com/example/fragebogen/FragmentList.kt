@@ -1,6 +1,7 @@
 package com.example.fragebogen
 
 import android.content.Context
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +10,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ListView
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.core.view.get
 import androidx.fragment.app.Fragment
 
@@ -44,8 +46,7 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
         return view
     }
 
-    private fun generateListView()
-    {
+    private fun generateListView() {
         if(idMasRandom == count)
         {
             showResult()
@@ -56,14 +57,35 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
             booleanMas = Array(mas[i].count(), { i -> false })
             listView.setOnItemClickListener { parent, view, position, id ->
                 if (position == listView.count - 1) {
-                    if (blockButtons) {
-                        idMasRandom++
-                        generateListView()
-                    } else {
-                        val textView = view.findViewById<TextView>(R.id.textView)
-                        textView.text = "Далее"
-                        blockButtons = true
-                        checkAnswer(mas[i].count() != 3)
+                    if(hasConnection()) {
+                        if (blockButtons) {
+                            idMasRandom++
+                            generateListView()
+                        } else {
+                            val textView = view.findViewById<TextView>(R.id.textView)
+                            textView.text = "Далее"
+                            blockButtons = true
+                            checkAnswer(mas[i].count() != 3)
+                        }
+                    }else{
+                        val t: Thread = object : Thread() {
+                            override fun run() {
+                                var flagThread = true
+                                for(i in (0 .. 1500))
+                                {
+                                    if(hasConnection())
+                                    {
+                                        flagThread = false
+                                    }else{
+                                        Thread.sleep(10)
+                                    }
+                                }
+                                if(flagThread)
+                                    System.exit(0)
+                            }
+                        }
+                        t.start()
+                        alertDialog()
                     }
 
 
@@ -85,9 +107,8 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
         listView.visibility = View.GONE
         textView.visibility = View.VISIBLE
         textAuthors.visibility = View.VISIBLE
-        textView.text = "Ваш резульат: ${countTrueAnswer} из ${mas.count()}"
+        textView.text = "Ваш резульат: ${countTrueAnswer} из ${count}"
     }
-
 
     private fun checkAnswer(flag:Boolean) {
         var flagAnswer = false
@@ -172,5 +193,30 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
             val childIndex = pos - firstListItemPosition
             listView.getChildAt(childIndex)
         }
+    }
+
+    fun hasConnection(): Boolean {
+        val cm =
+            contextA.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        var wifiInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
+        if (wifiInfo != null && wifiInfo.isConnected) {
+            return true
+        }
+        wifiInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE)
+        if (wifiInfo != null && wifiInfo.isConnected) {
+            return true
+        }
+        wifiInfo = cm.activeNetworkInfo
+        return wifiInfo != null && wifiInfo.isConnected
+    }
+
+    private fun alertDialog() {
+        val builder = AlertDialog.Builder(contextA)
+        builder.setTitle("Проверьте подключение к интернету!")
+        builder.setMessage("Без подключения к интернету тестирование завершится через 15 секунд")
+        builder.setPositiveButton("OK") { dialog, which ->
+
+        }
+        builder.show()
     }
 }

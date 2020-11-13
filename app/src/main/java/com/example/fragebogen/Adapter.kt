@@ -1,18 +1,22 @@
 package com.example.fragebogen
 
 import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.net.ConnectivityManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.ArrayAdapter
+import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import java.util.*
+import kotlin.collections.ArrayList
 
 class Adapter(items:ArrayList<ObjectQuestions>, context: Context)
     :ArrayAdapter<ObjectQuestions>(context,R.layout.fragment_listview, items){
@@ -22,6 +26,7 @@ class Adapter(items:ArrayList<ObjectQuestions>, context: Context)
     private lateinit var storage:FirebaseStorage
     private lateinit var storageRef: StorageReference
     private lateinit var progressBar: ProgressBar
+    private var flagAlertDialog = true
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         storage = FirebaseStorage.getInstance()
@@ -72,16 +77,67 @@ class Adapter(items:ArrayList<ObjectQuestions>, context: Context)
         textView.text = objectQuestions.text
     }
     private fun getBitmap(imageName:String, imageView:ImageView, progressBar: ProgressBar) {
-        val pathReference = storageRef.child(imageName)
-        val ONE_MEGABYTE: Long = 1024 * 1024
-        pathReference.getBytes(ONE_MEGABYTE).addOnSuccessListener {
-            val bitmap = BitmapFactory.decodeByteArray(it, 0,it.count())
-            progressBar.visibility = View.GONE
-            imageView.visibility = View.VISIBLE
-            imageView.setImageBitmap(bitmap)
-        }.addOnFailureListener {
-            Log.d("TAGA", it.toString())
+        if(hasConnection()) {
+            val pathReference = storageRef.child(imageName)
+            val ONE_MEGABYTE: Long = 1024 * 1024
+            pathReference.getBytes(ONE_MEGABYTE).addOnSuccessListener {
+                val bitmap = BitmapFactory.decodeByteArray(it, 0, it.count())
+                progressBar.visibility = View.GONE
+                imageView.visibility = View.VISIBLE
+                imageView.setImageBitmap(bitmap)
+            }.addOnFailureListener {
+                Log.d("TAGA", it.toString())
+            }
+        }else{
+            val t: Thread = object : Thread() {
+                override fun run() {
+                    var flagThread = true
+                    for(i in (0 .. 1500))
+                    {
+                        if(hasConnection())
+                        {
+                            getBitmap(imageName, imageView, progressBar)
+                            flagThread = false
+                        }else{
+                            Thread.sleep(10)
+                        }
+                    }
+                    if(flagThread)
+                        System.exit(0)
+                }
+            }
+            t.start()
+
+            if(flagAlertDialog) {
+                flagAlertDialog = false
+                alertDialog()
+            }
+
         }
     }
+    fun hasConnection(): Boolean {
+        val cm =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        var wifiInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
+        if (wifiInfo != null && wifiInfo.isConnected) {
+            return true
+        }
+        wifiInfo = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE)
+        if (wifiInfo != null && wifiInfo.isConnected) {
+            return true
+        }
+        wifiInfo = cm.activeNetworkInfo
+        return wifiInfo != null && wifiInfo.isConnected
+    }
+    private fun alertDialog() {
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle("Проверьте подключение к интернету!")
+        builder.setMessage("Без подключения к интернету тестирование завершится через 15 секунд")
+        builder.setPositiveButton("OK") { dialog, which ->
+
+        }
+        builder.show()
+    }
+
 
 }

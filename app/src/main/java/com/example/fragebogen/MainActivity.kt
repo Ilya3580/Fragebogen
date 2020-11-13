@@ -1,19 +1,20 @@
 package com.example.fragebogen
 
+import android.app.Activity
 import android.content.Context
-import android.graphics.Color
 import android.net.ConnectivityManager
 import android.os.Bundle
-import android.text.InputType
+import android.provider.Settings
 import android.util.Log
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
-import android.widget.RelativeLayout
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import java.lang.Exception
 
 
 class MainActivity : AppCompatActivity() {
@@ -23,28 +24,41 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var container:LinearLayout
     private lateinit var button:Button
+    private lateinit var editTextKey: EditText
+    private lateinit var editTextQuestion: EditText
+    private lateinit var textView:TextView
     private lateinit var fragment:FragmentList
     private lateinit var questions:ArrayList<ArrayList<ObjectQuestions>>
     private lateinit var progressBar:ProgressBar
     private var count:Int = 0
     private var block= false
     private var flagEnd = true
-
+    private var masterKey = ""
+    private var key = ""
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         container = findViewById(R.id.container)
         questions = ArrayList()
+        button = findViewById(R.id.button)
+        editTextKey = findViewById(R.id.editTextKey)
+        editTextQuestion = findViewById(R.id.editTextQuestion)
+        textView = findViewById(R.id.textView)
+
         dataBase = Firebase.database
         myRef = dataBase.reference
 
-        addButtonStart()
         button.setOnClickListener {
             if(hasConnection()) {
+                block = false
+                textView.visibility = View.GONE
                 button.visibility = View.GONE
+                editTextQuestion.visibility = View.GONE
+                editTextKey.visibility = View.GONE
                 progressBar = findViewById(R.id.progressBar)
                 progressBar.visibility = View.VISIBLE
+
                 generateList()
             }else{
                 Toast.makeText(this, "Нет подключения к интернету", Toast.LENGTH_LONG).show()
@@ -53,58 +67,78 @@ class MainActivity : AppCompatActivity() {
 
 
     }
-    private fun addButtonStart() {
-        button = Button(this)
-        val param:LinearLayout.LayoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.MATCH_PARENT)
-        val margin = 120
-        param.bottomMargin = margin
-        param.topMargin = margin
-        param.leftMargin = margin
-        param.rightMargin= margin
-        button.background = getDrawable(R.drawable.round_corner_orange)
-        button.textSize = 50f
-        button.setTextColor(Color.WHITE)
-        button.text = "Начать"
-        button.layoutParams = param
-        container.addView(button)
-    }
-    private fun alertDialog() {
+
+    private fun pressButton(lst:ArrayList<String>)
+    {
+
+        val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(editTextKey.windowToken, 0)
+        inputMethodManager.hideSoftInputFromWindow(editTextQuestion.windowToken, 0)
+        button.visibility = View.GONE
+        editTextQuestion.visibility = View.GONE
+        editTextKey.visibility = View.GONE
         progressBar.visibility = View.GONE
-        button.visibility = View.VISIBLE
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Введите количество вопросов")
-        val input = EditText(this)
-        input.inputType = InputType.TYPE_CLASS_NUMBER
-        builder.setView(input)
-        builder.setPositiveButton("OK") { dialog, which ->
-            count = input.text.toString().toInt()
-            if(count>questions.count() || count>10)
+
+        if(editTextQuestion.text.toString() == "")
+        {
+            alertDialogKey("Ввены не все данные")
+
+        }else {
+            var tryFlag = true
+            try {
+                count = editTextQuestion.text.toString().toInt()
+            }catch (e:Exception)
             {
-                Toast.makeText(this, "Введенное число слишком большое", Toast.LENGTH_LONG).show()
-                alertDialog()
-            }else if(count<1){
-                Toast.makeText(this, "Введенное число слишком маленькое", Toast.LENGTH_LONG).show()
-                alertDialog()
+                tryFlag = false
+            }
+            if(tryFlag) {
+                if (count > questions.count() || count > 10) {
+                    alertDialogKey("Введенное число слишком большое")
+                } else if (count < 1) {
+                    alertDialogKey("Введенное число слишком маленькое")
+                } else {
+                    var myKey = editTextKey.text.toString()
+                    if (key == myKey || myKey == masterKey) {
+                        if (checkId(lst, myKey == masterKey)) {
+                            container.removeAllViews()
+                            generateFragment()
+                        }
+                    } else {
+                        alertDialogKey("Введеный ключ не верный! Попробуйте еще раз")
+                    }
+                }
             }else{
-                container.removeAllViews()
-                generateFragment()
+                alertDialogKey("Введены не верные данные")
             }
         }
-        builder.show()
+
     }
+
     private fun generateFragment() {
         fragment = FragmentList.newInstance(questions, count, this)
         supportFragmentManager.beginTransaction().replace(R.id.container, fragment).commit()
-        block = true
         flagEnd = false
     }
     private fun generateList() {
         myRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 questions.clear()
+                var lstA = ArrayList<String>()
                 for (ds in dataSnapshot.children) {
+                    if(ds.key == "masterKey")
+                    {
+                        masterKey = ds.value.toString()
+                    }
+                    if(ds.key == "key"){
+                        for (dsChild in ds.children) {
+                            if(dsChild.key.toString() == "key")
+                            {
+                                key = dsChild.value.toString()
+                            }else {
+                                lstA.add(dsChild.value.toString())
+                            }
+                        }
+                    }
                     val arrayList = ArrayList<String>()
                     for (dsChild in ds.children) {
                         var flagIter = false
@@ -126,7 +160,8 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 if(!block) {
-                    alertDialog()
+                    pressButton(lstA)
+                    block = true
                 }
 
             }
@@ -169,8 +204,7 @@ class MainActivity : AppCompatActivity() {
         }
         builder.show()
     }
-    private fun convertListObjectQuestion(lst:ArrayList<String>) : ArrayList<ObjectQuestions>
-    {
+    private fun convertListObjectQuestion(lst:ArrayList<String>) : ArrayList<ObjectQuestions> {
         var mas:ArrayList<ObjectQuestions> = ArrayList()
         var flag = false
         for(n in lst)
@@ -190,6 +224,45 @@ class MainActivity : AppCompatActivity() {
             }
         }
         return mas
+    }
+    private fun checkId(lst:ArrayList<String>, flagMasterKey:Boolean):Boolean {
+        if(flagMasterKey)
+        {
+            return true
+        }
+        var flagId = true
+        val ANDROID_ID: String = Settings.Secure.getString(
+            applicationContext.contentResolver,
+            Settings.Secure.ANDROID_ID
+        )
+        for(n in lst)
+        {
+            if(n == ANDROID_ID)
+            {
+                flagId = false
+                break
+            }
+        }
+        if(flagId) {
+            myRef.child("key").child(ANDROID_ID).setValue(ANDROID_ID)
+            return true
+        }else{
+            alertDialogKey("Вы использовали данный ключ")
+            return false
+        }
+    }
+    private fun alertDialogKey(text:String) {
+        textView.visibility = View.VISIBLE
+        button.visibility = View.VISIBLE
+        editTextQuestion.visibility = View.VISIBLE
+        editTextKey.visibility = View.VISIBLE
+        progressBar.visibility = View.GONE
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(text)
+        builder.setPositiveButton("OK") { dialog, which ->
+        }
+
+        builder.show()
     }
 
 }
