@@ -81,13 +81,16 @@ class MainActivity : AppCompatActivity() {
         val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(editTextKey.windowToken, 0)
         var myKey = editTextKey.text.toString()
-
-        if (myKey == masterKey) {
-            masterFlag = true
-            generateFragment()
+        if(myKey != "") {
+            if (myKey == masterKey) {
+                masterFlag = true
+                generateFragment()
+            } else {
+                progressBarStart()
+                checkKey()
+            }
         }else{
-            progressBarStart()
-            checkKey()
+            alertDialog("Введите ключ")
         }
     }
 

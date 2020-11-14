@@ -8,10 +8,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.marginBottom
 import com.google.firebase.storage.FirebaseStorage
@@ -46,7 +43,8 @@ class Adapter(items:ArrayList<ObjectQuestions>, context: Context)
             generateTextView(position)
             if(position !=0) {
                 if (position == count - 1) {
-                    view.background = context.getDrawable(R.drawable.round_corner_orange)
+                    val textView = view.findViewById<TextView>(R.id.textView)
+                    textView.background = context.getDrawable(R.drawable.round_corner_orange)
                 } else {
                     view.background = context.getDrawable(R.drawable.round_corner)
                 }
@@ -69,7 +67,9 @@ class Adapter(items:ArrayList<ObjectQuestions>, context: Context)
             textView.setTextColor(Color.WHITE)
             textView.setPadding(0,30,0,30)
             textView.textSize = 30F
-
+            var param = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+            param.setMargins(0,0,0,50)
+            textView.layoutParams = param
         }
         if(position == 0)
         {

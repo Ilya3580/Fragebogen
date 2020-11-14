@@ -14,7 +14,7 @@
         android:id="@+id/textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Введите все данные" />
+        android:text="Введите данные" />
     <EditText
         android:layout_gravity="center"
         android:textColor="#000000"
@@ -23,7 +23,9 @@
         android:id="@+id/editTextKey"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Введите ключ" />
+        android:hint="Введите ключ"
+        android:layout_margin="20dp"
+        />
     <Button
         android:layout_gravity="center"
         android:textColor="#FFFFFF"
@@ -32,7 +34,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/round_corner_orange"
-        android:text="продолжить" />
+        android:text="продолжить"
+        android:layout_margin="20dp" />
     <ProgressBar
         android:visibility="gone"
         android:id="@+id/progressBar"
