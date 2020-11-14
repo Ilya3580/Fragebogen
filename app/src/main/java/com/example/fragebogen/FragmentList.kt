@@ -38,7 +38,7 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
     private var countTrueAnswer = 0
     private lateinit var progressBarLitle:ProgressBar
     private lateinit var textViewResult:TextView
-    private var time = 60 * 1000
+    private var time = 30 * 1000
 
     var timer = object: CountDownTimer(time.toLong(), 1) {
         override fun onTick(millisUntilFinished: Long) {
