@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity() {
     private var blockKey = false
     private var flagEnd = true
     private var masterKey = ""
-    private var key = ""
+    private var masterFlag = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -83,6 +83,7 @@ class MainActivity : AppCompatActivity() {
         var myKey = editTextKey.text.toString()
 
         if (myKey == masterKey) {
+            masterFlag = true
             generateFragment()
         }else{
             progressBarStart()
@@ -102,6 +103,8 @@ class MainActivity : AppCompatActivity() {
         button.layoutParams = param
         button.text = "начать"
         button.setOnClickListener {
+            globalStudent.key = "+" + globalStudent.key
+            myRef.child("students").child(globalStudent.surname).setValue(globalStudent)
             container.removeAllViews()
             fragment = FragmentList.newInstance(questions, questions.size, this, globalStudent)
             supportFragmentManager.beginTransaction().replace(R.id.container, fragment).commit()
@@ -219,8 +222,6 @@ class MainActivity : AppCompatActivity() {
                                 student = StudentClass(mas[0], mas[1], mas[2])
                                 if (student.key == editTextKey.text.toString() && student.key[0] != '+') {
                                     globalStudent = student
-                                    student.key = "+" + student.key
-                                    myRef.child("students").child(student.surname).setValue(student)
                                     blockKey = true
                                     generateFragment()
                                 } else if (student.key == "+" + editTextKey.text.toString() && student.key[0] == '+') {

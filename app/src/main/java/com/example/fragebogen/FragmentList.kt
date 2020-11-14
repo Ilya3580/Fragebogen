@@ -1,15 +1,15 @@
 package com.example.fragebogen
 
 import android.content.Context
+import android.graphics.Color
 import android.net.ConnectivityManager
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
-import android.widget.ListView
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.get
 import androidx.fragment.app.Fragment
@@ -36,6 +36,26 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
     private var blockButtons = false
     private var i = 0
     private var countTrueAnswer = 0
+    private lateinit var progressBarLitle:ProgressBar
+    private lateinit var textViewResult:TextView
+    private var time = 60 * 1000
+
+    var timer = object: CountDownTimer(time.toLong(), 1) {
+        override fun onTick(millisUntilFinished: Long) {
+            progressBarLitle.progress = millisUntilFinished.toInt()
+
+        }
+
+        override fun onFinish() {
+            idMasRandom++
+            if(idMasRandom >= count)
+            {
+                showResult()
+            }
+            generateListView()
+        }
+    }
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         var view =  inflater.inflate(R.layout.fragment_list_fragment, container, false)
@@ -44,20 +64,30 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
         myRef = dataBase.reference
         listView = view.findViewById(R.id.listView)
         textView = view.findViewById(R.id.textViewResult)
+        textViewResult = view.findViewById(R.id.textViewResultMini)
         textAuthors = view.findViewById(R.id.textAuthors)
+        progressBarLitle = view.findViewById(R.id.progressBarLitle)
         masRandom = Array(mas.count(), {i->-1})
 
 
         generateRandomMas()
         generateListView()
+
+        progressBarLitle.getProgressDrawable().setColorFilter(
+            Color.RED, android.graphics.PorterDuff.Mode.SRC_IN);
+
+
         return view
     }
 
     private fun generateListView() {
-        if(idMasRandom == count)
+        if(idMasRandom >= count)
         {
             showResult()
         }else {
+            progressBarLitle.max = time
+            timer.start()
+            textViewResult.text = "${idMasRandom+1}/${count}"
             i = masRandom[idMasRandom]
             blockButtons = false
             listView.adapter = Adapter(mas[i], contextA)
@@ -66,8 +96,9 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
                 if (position == listView.count - 1) {
                     if(hasConnection()) {
                         if (blockButtons) {
-                            idMasRandom++
-                            generateListView()
+                            /*idMasRandom++
+                            generateListView()*/
+                            timer.onFinish()
                         } else {
                             val textView = view.findViewById<TextView>(R.id.textView)
                             textView.text = "Далее"
@@ -111,6 +142,8 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
     }
 
     private fun showResult() {
+        progressBarLitle.visibility = View.GONE
+        textViewResult.visibility = View.GONE
         student.result="${countTrueAnswer} из ${count}"
         myRef.child("students").child(student.surname).setValue(student)
         listView.visibility = View.GONE
@@ -228,4 +261,6 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
         }
         builder.show()
     }
+
+
 }
