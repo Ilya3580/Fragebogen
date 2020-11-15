@@ -80,13 +80,14 @@ class MainActivity : AppCompatActivity() {
     {
         val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(editTextKey.windowToken, 0)
-        var myKey = editTextKey.text.toString()
+        var myKey = editTextKey.text.trim()
         if(myKey != "") {
             if (myKey == masterKey) {
                 masterFlag = true
                 generateFragment()
             } else {
                 progressBarStart()
+                blockKey = false
                 checkKey()
             }
         }else{
@@ -118,35 +119,35 @@ class MainActivity : AppCompatActivity() {
     private fun generateList() {
         myRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                questions.clear()
-                for (ds in dataSnapshot.children) {
-                    if(ds.key == "masterKey")
-                    {
-                        masterKey = ds.value.toString()
-                    }
-                    if(ds.key != "students") {
-                        val arrayList = ArrayList<String>()
-                        for (dsChild in ds.children) {
-                            var flagIter = false
-                            var flag = true
-                            for (dsChildChild in dsChild.children) {
-                                arrayList.add(dsChildChild.value.toString())
-                                flag = false
-                                flagIter = true
-                            }
-                            if (flag) {
-                                arrayList.add(0, dsChild.value.toString())
-                            }
-                            if (flagIter) {
-                                arrayList.add("Проверить")
-                                questions.add(convertListObjectQuestion(arrayList))
+                if(!block) {
+                    block = true
+                    questions.clear()
+                    for (ds in dataSnapshot.children) {
+                        if(ds.key == "masterKey")
+                        {
+                            masterKey = ds.value.toString()
+                        }
+                        if(ds.key != "students") {
+                            val arrayList = ArrayList<String>()
+                            for (dsChild in ds.children) {
+                                var flagIter = false
+                                var flag = true
+                                for (dsChildChild in dsChild.children) {
+                                    arrayList.add(dsChildChild.value.toString())
+                                    flag = false
+                                    flagIter = true
+                                }
+                                if (flag) {
+                                    arrayList.add(0, dsChild.value.toString())
+                                }
+                                if (flagIter) {
+                                    arrayList.add("Проверить")
+                                    questions.add(convertListObjectQuestion(arrayList))
+                                }
                             }
                         }
                     }
-                }
-                if(!block) {
                     pressButton()
-                    block = true
                 }
 
             }
@@ -214,6 +215,8 @@ class MainActivity : AppCompatActivity() {
         myRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if(!blockKey) {
+                    var keyStr = editTextKey.text.trim().toString()
+                    blockKey = true
                     for (ds in dataSnapshot.children) {
                         if (ds.key == "students") {
                             for (dsChild in ds.children) {
@@ -223,17 +226,16 @@ class MainActivity : AppCompatActivity() {
                                     mas.add(dsChilChild.value.toString())
                                 }
                                 student = StudentClass(mas[0], mas[1], mas[2])
-                                if (student.key == editTextKey.text.toString() && student.key[0] != '+') {
+                                if (student.key == keyStr && student.key[0] != '+') {
                                     globalStudent = student
-                                    blockKey = true
                                     generateFragment()
-                                } else if (student.key == "+" + editTextKey.text.toString() && student.key[0] == '+') {
+                                    return
+                                } else if (student.key == "+" + keyStr && student.key[0] == '+') {
                                     alertDialog("Данный ключ уже использовали")
                                     return
                                 }
                             }
-                            if(!blockKey)
-                                alertDialog("Ключ не найден")
+                            alertDialog("Ключ не найден")
                         }
                     }
                 }

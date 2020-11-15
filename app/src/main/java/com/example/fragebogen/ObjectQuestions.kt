@@ -91,4 +91,12 @@ class ObjectQuestions(string: String, boolean: Boolean) {
         set(value) {
             editTextFlagPrivate = value
         }
+
+    var idBackground = R.drawable.round_corner
+        get(){
+            return field
+        }
+        set(value) {
+            field = value
+        }
 }

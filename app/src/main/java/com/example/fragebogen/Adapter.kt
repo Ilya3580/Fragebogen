@@ -4,11 +4,13 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.ConnectivityManager
+import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.marginBottom
 import com.google.firebase.storage.FirebaseStorage
@@ -26,6 +28,7 @@ class Adapter(items:ArrayList<ObjectQuestions>, context: Context)
     private lateinit var progressBar: ProgressBar
     private var flagAlertDialog = true
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         storage = FirebaseStorage.getInstance()
         storageRef = storage.reference
@@ -46,10 +49,12 @@ class Adapter(items:ArrayList<ObjectQuestions>, context: Context)
                     val textView = view.findViewById<TextView>(R.id.textView)
                     textView.background = context.getDrawable(R.drawable.round_corner_orange)
                 } else {
-                    view.background = context.getDrawable(R.drawable.round_corner)
+                    val textView = view.findViewById<TextView>(R.id.textView)
+                    view.background = context.getDrawable(getItem(position)!!.idBackground)
                 }
             }
         }
+
         return view
     }
 

@@ -3,6 +3,7 @@ package com.example.fragebogen
 import android.content.Context
 import android.graphics.Color
 import android.net.ConnectivityManager
+import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.LayoutInflater
@@ -10,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.get
 import androidx.fragment.app.Fragment
@@ -38,12 +40,22 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
     private var countTrueAnswer = 0
     private lateinit var progressBarLitle:ProgressBar
     private lateinit var textViewResult:TextView
-    private var time = 30 * 1000
-
+    private var time = 55 * 1000
+    private var timeBetween = 10 * 1000
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     var timer = object: CountDownTimer(time.toLong(), 1) {
         override fun onTick(millisUntilFinished: Long) {
             progressBarLitle.progress = millisUntilFinished.toInt()
 
+        }
+
+        override fun onFinish() {
+            checkAnswer()
+        }
+    }
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    var timerBetween = object: CountDownTimer(timeBetween.toLong(), 1) {
+        override fun onTick(millisUntilFinished: Long) {
         }
 
         override fun onFinish() {
@@ -55,8 +67,7 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
             generateListView()
         }
     }
-
-
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         var view =  inflater.inflate(R.layout.fragment_list_fragment, container, false)
 
@@ -80,6 +91,7 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
         return view
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun generateListView() {
         if(idMasRandom >= count)
         {
@@ -96,14 +108,18 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
                 if (position == listView.count - 1) {
                     if(hasConnection()) {
                         if (blockButtons) {
-                            /*idMasRandom++
-                            generateListView()*/
-                            timer.onFinish()
+                            timerBetween.cancel()
+                            idMasRandom++
+                            if(idMasRandom >= count)
+                            {
+                                showResult()
+                            }
+                            generateListView()
                         } else {
                             val textView = view.findViewById<TextView>(R.id.textView)
                             textView.text = "Далее"
                             blockButtons = true
-                            checkAnswer(mas[i].count() != 3)
+                            checkAnswer()
                         }
                     }else{
                         val t: Thread = object : Thread() {
@@ -129,10 +145,12 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
 
                 } else if (!blockButtons && position != 0 && mas[i].count() != 3) {
                     if (booleanMas[position]) {
-                        view.background = contextA.getDrawable(R.drawable.round_corner)
+                        mas[i][position].idBackground = R.drawable.round_corner
+                        view.background = contextA.getDrawable(mas[i][position].idBackground)
                         booleanMas[position] = false
                     } else {
-                        view.background = contextA.getDrawable(R.drawable.round_corner_orange)
+                        mas[i][position].idBackground = R.drawable.round_corner_orange
+                        view.background = contextA.getDrawable(mas[i][position].idBackground)
                         booleanMas[position] = true
                     }
                 }
@@ -152,7 +170,11 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
         textView.text = "Ваш резульат: ${countTrueAnswer} из ${count}"
     }
 
-    private fun checkAnswer(flag:Boolean) {
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    private fun checkAnswer() {
+        timer.cancel()
+        timerBetween.start()
+        var flag = mas[i].count() != 3
         var flagAnswer = false
         if(flag)
         {
@@ -162,11 +184,13 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
                 if(booleanMas[j] && !mas[i][j].trueAnswer || mas[i][j].trueAnswer && !booleanMas[j])
                 {
                     flagAnswer = false
-                    getViewByPosition(j, listView)?.background = contextA.getDrawable(R.drawable.roundcorner_red)
+                    mas[i][j].idBackground = R.drawable.roundcorner_red
+                    getViewByPosition(j, listView)?.background = contextA.getDrawable(mas[i][j].idBackground)
                 }
                 if(mas[i][j].trueAnswer)
                 {
-                    getViewByPosition(j, listView)?.background = contextA.getDrawable(R.drawable.roundcorner_green)
+                    mas[i][j].idBackground = R.drawable.roundcorner_green
+                    getViewByPosition(j, listView)?.background = contextA.getDrawable(mas[i][j].idBackground)
                 }
             }
         }else{
@@ -175,7 +199,7 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
             imm.hideSoftInputFromWindow(view?.windowToken, 0)
             editText?.isFocusable = false
             editText?.isLongClickable = false
-            val textUser = editText?.text
+            val textUser = editText?.text?.trim().toString()
             var trueAnswer = ""
             for(j in (1 until mas[i].count() - 1))
             {
@@ -185,7 +209,7 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
                     trueAnswer +=", "
                 }
 
-                if(editText?.text.toString() == mas[i][j].editText)
+                if(textUser == mas[i][j].editText)
                 {
                     flagAnswer = true
                     break
@@ -194,9 +218,11 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
             if(!flagAnswer)
             {
                 editText?.setText("Ваш ответ: ${textUser}\nПравильный ответ: ${trueAnswer}")
-                getViewByPosition(1, listView)?.background = contextA.getDrawable(R.drawable.roundcorner_red)
+                mas[i][1].idBackground = R.drawable.roundcorner_red
+                getViewByPosition(1, listView)?.background = contextA.getDrawable(mas[i][1].idBackground)
             }else{
-                getViewByPosition(1, listView)?.background = contextA.getDrawable(R.drawable.roundcorner_green)
+                mas[i][1].idBackground = R.drawable.roundcorner_green
+                getViewByPosition(1, listView)?.background = contextA.getDrawable(mas[i][1].idBackground)
             }
         }
         if(flagAnswer)
