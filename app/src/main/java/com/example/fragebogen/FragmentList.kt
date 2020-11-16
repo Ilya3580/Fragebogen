@@ -41,7 +41,7 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
     private var countTrueAnswer = 0
     private lateinit var progressBarLitle:ProgressBar
     private lateinit var textViewResult:TextView
-    private var time = 55 * 1000
+    private var time = 60 * 1000
     private var timeBetween = 10 * 1000
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     var timer = object: CountDownTimer(time.toLong(), 1) {
