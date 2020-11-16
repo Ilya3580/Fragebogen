@@ -5,14 +5,11 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.marginBottom
-import androidx.core.view.marginTop
 import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
@@ -27,7 +24,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var button:Button
     private lateinit var editTextKey: EditText
     private lateinit var textView:TextView
-    private lateinit var fragment:FragmentList
+    private lateinit var fragment:Fragment
     private lateinit var questions:ArrayList<ArrayList<ObjectQuestions>>
     private lateinit var progressBar:ProgressBar
     private lateinit var globalStudent:StudentClass
@@ -110,7 +107,7 @@ class MainActivity : AppCompatActivity() {
             globalStudent.key = "+" + globalStudent.key
             myRef.child("students").child(globalStudent.surname).setValue(globalStudent)
             container.removeAllViews()
-            fragment = FragmentList.newInstance(questions, questions.size, this, globalStudent)
+            fragment = Fragment.newInstance(questions, questions.size, this, globalStudent)
             supportFragmentManager.beginTransaction().replace(R.id.container, fragment).commit()
             flagEnd = false
         }

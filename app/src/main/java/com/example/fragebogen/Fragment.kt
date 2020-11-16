@@ -6,7 +6,6 @@ import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.text.Editable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,7 +13,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
-import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
@@ -22,10 +20,11 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 
 
-class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, private var count:Int, private var contextA:Context, private var student:StudentClass) : Fragment() {
+class Fragment(private var mas: ArrayList<ArrayList<ObjectQuestions>>, private var count:Int, private var contextA:Context, private var student:StudentClass) : Fragment() {
 
     companion object {
-        fun newInstance(mas:ArrayList<ArrayList<ObjectQuestions>>, count: Int,contextA:Context, student:StudentClass) = FragmentList(mas, count,contextA, student)
+        fun newInstance(mas:ArrayList<ArrayList<ObjectQuestions>>, count: Int,contextA:Context, student:StudentClass) =
+            Fragment(mas, count,contextA, student)
 
     }
     private lateinit var dataBase: FirebaseDatabase
@@ -117,9 +116,6 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
                             }
                             generateListView()
                         } else {
-                            val textView = view.findViewById<TextView>(R.id.textView)
-                            textView.text = "Далее"
-                            blockButtons = true
                             checkAnswer()
                         }
                     }else{
@@ -173,6 +169,9 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun checkAnswer() {
+        val textView = getViewByPosition(mas[i].count()-1, listView)?.findViewById<TextView>(R.id.textView)
+        textView?.text = "Далее"
+        blockButtons = true
         timer.cancel()
         timerBetween.start()
         var flag = mas[i].count() != 3
