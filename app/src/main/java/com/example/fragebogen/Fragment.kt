@@ -209,7 +209,7 @@ class Fragment(private var mas: ArrayList<ArrayList<ObjectQuestions>>, private v
                     trueAnswer +=", "
                 }
 
-                if(textUser == mas[i][j].editText)
+                if(textUser.replace(" ", "") == mas[i][j].editText?.replace(" ", ""))
                 {
                     editText?.setText(textUser)
                     flagAnswer = true

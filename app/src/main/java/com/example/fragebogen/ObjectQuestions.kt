@@ -99,4 +99,18 @@ class ObjectQuestions(string: String, boolean: Boolean) {
         set(value) {
             field = value
         }
+    var idBitmap: Bitmap? = null
+        get(){
+            return field
+        }
+        set(value) {
+            field = value
+        }
+    var idBitmapFlag = false
+        get(){
+            return field
+        }
+        set(value) {
+            field = value
+        }
 }

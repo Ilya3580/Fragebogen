@@ -37,7 +37,7 @@ class Adapter(items:ArrayList<ObjectQuestions>, context: Context)
         {
             view = LayoutInflater.from(context).inflate(R.layout.fragment_listview_image, parent, false)
             progressBar = view.findViewById(R.id.progressBar)
-            generateImageView()
+            generateImageView(position)
             generateTextView(position)
         }else if(objectQuestions.editTextFlag){
             view = LayoutInflater.from(context).inflate(R.layout.fragment_listview_edit_text, parent, false)
@@ -58,10 +58,9 @@ class Adapter(items:ArrayList<ObjectQuestions>, context: Context)
         return view
     }
 
-    private fun generateImageView()
+    private fun generateImageView(position: Int)
     {
-        val imageView = view.findViewById<ImageView>(R.id.imageView)
-        objectQuestions.bitmap?.let { getBitmap(it, imageView, progressBar) }
+        objectQuestions.bitmap?.let { getBitmap(it,  progressBar, position) }
     }
 
     private fun generateTextView(position: Int)
@@ -83,17 +82,31 @@ class Adapter(items:ArrayList<ObjectQuestions>, context: Context)
         }
         textView.text = objectQuestions.text
     }
-    private fun getBitmap(imageName:String, imageView:ImageView, progressBar: ProgressBar) {
+    private fun getBitmap(imageName:String, progressBar: ProgressBar, position: Int) {
+        val imageView = view.findViewById<ImageView>(R.id.imageView)
         if(hasConnection()) {
-            val pathReference = storageRef.child(imageName)
-            val ONE_MEGABYTE: Long = 1024 * 1024
-            pathReference.getBytes(ONE_MEGABYTE).addOnSuccessListener {
-                val bitmap = BitmapFactory.decodeByteArray(it, 0, it.count())
+            if(getItem(position)?.idBitmapFlag!!)
+            {
                 progressBar.visibility = View.GONE
                 imageView.visibility = View.VISIBLE
-                imageView.setImageBitmap(bitmap)
-            }.addOnFailureListener {
-                Log.d("TAGA", it.toString())
+                imageView.setImageBitmap(getItem(position)?.idBitmap)
+            }else {
+                val pathReference = storageRef.child(imageName)
+                val ONE_MEGABYTE: Long = 1024 * 1024
+                pathReference.getBytes(ONE_MEGABYTE).addOnSuccessListener {
+                    val bitmap = BitmapFactory.decodeByteArray(it, 0, it.count())
+                    progressBar.visibility = View.GONE
+                    imageView.visibility = View.VISIBLE
+                    imageView.layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        it.size / 50
+                    )
+                    imageView.setImageBitmap(bitmap)
+                    getItem(position)?.idBitmap = bitmap
+                    getItem(position)?.idBitmapFlag = true
+                }.addOnFailureListener {
+                    Log.d("TAGA", it.toString())
+                }
             }
         }else{
             val t: Thread = object : Thread() {
@@ -103,7 +116,7 @@ class Adapter(items:ArrayList<ObjectQuestions>, context: Context)
                     {
                         if(hasConnection())
                         {
-                            getBitmap(imageName, imageView, progressBar)
+                            getBitmap(imageName, progressBar, position)
                             flagThread = false
                         }else{
                             Thread.sleep(10)
