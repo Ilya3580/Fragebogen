@@ -6,6 +6,7 @@ import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.text.Editable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -211,6 +212,7 @@ class FragmentList(private var mas: ArrayList<ArrayList<ObjectQuestions>>, priva
 
                 if(textUser == mas[i][j].editText)
                 {
+                    editText?.setText(textUser)
                     flagAnswer = true
                     break
                 }
