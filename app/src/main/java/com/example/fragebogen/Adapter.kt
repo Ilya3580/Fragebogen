@@ -123,10 +123,6 @@ class Adapter(items: ArrayList<ObjectQuestions>, context: Context)
                     val bitmap = BitmapFactory.decodeByteArray(it, 0, it.count())
                     progressBar.visibility = View.GONE
                     imageView.visibility = View.VISIBLE
-                    /*imageView.layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        it.size / 50
-                    )*/
                     imageView.setImageBitmap(bitmap)
                     getItem(position)?.idBitmap = bitmap
                     getItem(position)?.idBitmapFlag = true
