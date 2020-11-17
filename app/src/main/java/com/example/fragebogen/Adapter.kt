@@ -1,6 +1,8 @@
 package com.example.fragebogen
 
+import android.app.PendingIntent.getActivity
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.ConnectivityManager
@@ -14,6 +16,8 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 
@@ -42,17 +46,16 @@ class Adapter(items: ArrayList<ObjectQuestions>, context: Context)
             generateTextView(position)
         }else if(objectQuestions.editTextFlag){
             view = LayoutInflater.from(context).inflate(R.layout.fragment_listview_edit_text, parent,false)
-            generateEditText()
+            generateEditText(position)
         }else{
             view = LayoutInflater.from(context).inflate(R.layout.fragment_listview, parent, false)
             generateTextView(position)
             if(position !=0) {
                 if (position == count - 1) {
                     val textView = view.findViewById<TextView>(R.id.textView)
-                    textView.background = context.getDrawable(R.drawable.round_corner_orange)
+                    textView.background = ContextCompat.getDrawable(context, R.drawable.round_corner_orange)
                 } else {
-                    val textView = view.findViewById<TextView>(R.id.textView)
-                    view.background = context.getDrawable(getItem(position)!!.idBackground)
+                    view.background = ContextCompat.getDrawable(context, getItem(position)!!.idBackground)
                 }
             }
         }
@@ -65,9 +68,10 @@ class Adapter(items: ArrayList<ObjectQuestions>, context: Context)
         objectQuestions.bitmap?.let { getBitmap(it, progressBar, position) }
     }
 
-    private fun generateEditText()
+    private fun generateEditText(position: Int)
     {
         var editText = view.findViewById<EditText>(R.id.editText)
+        editText.background = ContextCompat.getDrawable(context, getItem(position)!!.idBackground)
         editText.setText(editTextText)
         editText.addTextChangedListener(object : TextWatcher {
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
@@ -119,10 +123,10 @@ class Adapter(items: ArrayList<ObjectQuestions>, context: Context)
                     val bitmap = BitmapFactory.decodeByteArray(it, 0, it.count())
                     progressBar.visibility = View.GONE
                     imageView.visibility = View.VISIBLE
-                    imageView.layoutParams = LinearLayout.LayoutParams(
+                    /*imageView.layoutParams = LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
                         it.size / 50
-                    )
+                    )*/
                     imageView.setImageBitmap(bitmap)
                     getItem(position)?.idBitmap = bitmap
                     getItem(position)?.idBitmapFlag = true

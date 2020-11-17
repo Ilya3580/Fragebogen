@@ -1,6 +1,7 @@
 package com.example.fragebogen
 
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Color
 import android.net.ConnectivityManager
 import android.os.Build
@@ -13,6 +14,8 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
@@ -143,11 +146,11 @@ class Fragment(private var mas: ArrayList<ArrayList<ObjectQuestions>>, private v
                 } else if (!blockButtons && position != 0 && mas[i].count() != 3) {
                     if (booleanMas[position]) {
                         mas[i][position].idBackground = R.drawable.round_corner
-                        view.background = contextA.getDrawable(mas[i][position].idBackground)
+                        view.background = ContextCompat.getDrawable(contextA, mas[i][position].idBackground)
                         booleanMas[position] = false
                     } else {
                         mas[i][position].idBackground = R.drawable.round_corner_orange
-                        view.background = contextA.getDrawable(mas[i][position].idBackground)
+                        view.background = ContextCompat.getDrawable(contextA, mas[i][position].idBackground)
                         booleanMas[position] = true
                     }
                 }
@@ -185,12 +188,12 @@ class Fragment(private var mas: ArrayList<ArrayList<ObjectQuestions>>, private v
                 {
                     flagAnswer = false
                     mas[i][j].idBackground = R.drawable.roundcorner_red
-                    getViewByPosition(j, listView)?.background = contextA.getDrawable(mas[i][j].idBackground)
+                    getViewByPosition(j, listView)?.background = ContextCompat.getDrawable(contextA, mas[i][j].idBackground)
                 }
                 if(mas[i][j].trueAnswer)
                 {
                     mas[i][j].idBackground = R.drawable.roundcorner_green
-                    getViewByPosition(j, listView)?.background = contextA.getDrawable(mas[i][j].idBackground)
+                    getViewByPosition(j, listView)?.background = ContextCompat.getDrawable(contextA, mas[i][j].idBackground)
                 }
             }
         }else{
@@ -218,12 +221,18 @@ class Fragment(private var mas: ArrayList<ArrayList<ObjectQuestions>>, private v
             }
             if(!flagAnswer)
             {
-                editText?.setText("Ваш ответ: ${textUser}\nПравильный ответ: ${trueAnswer}")
+                if(textUser.replace(" ", "")=="")
+                {
+                    editText?.setText("Правильный ответ: ${trueAnswer}")
+                }else{
+                    editText?.setText("Ваш ответ: ${textUser}\nПравильный ответ: ${trueAnswer}")
+                }
+
                 mas[i][1].idBackground = R.drawable.roundcorner_red
-                getViewByPosition(1, listView)?.background = contextA.getDrawable(mas[i][1].idBackground)
+                editText?.background =  ContextCompat.getDrawable(contextA, mas[i][1].idBackground)
             }else{
                 mas[i][1].idBackground = R.drawable.roundcorner_green
-                getViewByPosition(1, listView)?.background = contextA.getDrawable(mas[i][1].idBackground)
+                editText?.background = ContextCompat.getDrawable(contextA, mas[i][1].idBackground)
             }
         }
         if(flagAnswer)
