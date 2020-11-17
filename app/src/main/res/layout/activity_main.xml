@@ -16,6 +16,7 @@
         android:layout_height="wrap_content"
         android:text="Введите данные" />
     <EditText
+        android:inputType="text"
         android:layout_gravity="center"
         android:textColor="#000000"
         android:paddingLeft="20dp"

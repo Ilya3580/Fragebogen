@@ -5,6 +5,8 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.ConnectivityManager
 import android.os.Build
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -12,14 +14,12 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
-import androidx.core.view.marginBottom
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
-import java.util.*
-import kotlin.collections.ArrayList
 
-class Adapter(items:ArrayList<ObjectQuestions>, context: Context)
-    :ArrayAdapter<ObjectQuestions>(context,R.layout.fragment_listview, items){
+
+class Adapter(items: ArrayList<ObjectQuestions>, context: Context)
+    :ArrayAdapter<ObjectQuestions>(context, R.layout.fragment_listview, items){
 
     private lateinit var view: View
     private lateinit var objectQuestions:ObjectQuestions
@@ -27,6 +27,7 @@ class Adapter(items:ArrayList<ObjectQuestions>, context: Context)
     private lateinit var storageRef: StorageReference
     private lateinit var progressBar: ProgressBar
     private var flagAlertDialog = true
+    private var editTextText = ""
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
@@ -35,12 +36,13 @@ class Adapter(items:ArrayList<ObjectQuestions>, context: Context)
         objectQuestions = getItem(position)!!
         if(objectQuestions.bitmapFlag)
         {
-            view = LayoutInflater.from(context).inflate(R.layout.fragment_listview_image, parent, false)
+            view = LayoutInflater.from(context).inflate(R.layout.fragment_listview_image, parent,false)
             progressBar = view.findViewById(R.id.progressBar)
             generateImageView(position)
             generateTextView(position)
         }else if(objectQuestions.editTextFlag){
-            view = LayoutInflater.from(context).inflate(R.layout.fragment_listview_edit_text, parent, false)
+            view = LayoutInflater.from(context).inflate(R.layout.fragment_listview_edit_text, parent,false)
+            generateEditText()
         }else{
             view = LayoutInflater.from(context).inflate(R.layout.fragment_listview, parent, false)
             generateTextView(position)
@@ -60,7 +62,24 @@ class Adapter(items:ArrayList<ObjectQuestions>, context: Context)
 
     private fun generateImageView(position: Int)
     {
-        objectQuestions.bitmap?.let { getBitmap(it,  progressBar, position) }
+        objectQuestions.bitmap?.let { getBitmap(it, progressBar, position) }
+    }
+
+    private fun generateEditText()
+    {
+        var editText = view.findViewById<EditText>(R.id.editText)
+        editText.setText(editTextText)
+        editText.addTextChangedListener(object : TextWatcher {
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+            }
+
+            override fun afterTextChanged(editable: Editable) {
+                editTextText = editable.toString()
+            }
+
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
+            }
+        })
     }
 
     private fun generateTextView(position: Int)
@@ -69,20 +88,23 @@ class Adapter(items:ArrayList<ObjectQuestions>, context: Context)
         if(position == count-1)
         {
             textView.setTextColor(Color.WHITE)
-            textView.setPadding(0,30,0,30)
+            textView.setPadding(0, 30, 0, 30)
             textView.textSize = 30F
-            var param = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-            param.setMargins(0,0,0,50)
+            var param = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            param.setMargins(0, 0, 0, 50)
             textView.layoutParams = param
         }
         if(position == 0)
         {
             textView.textAlignment = View.TEXT_ALIGNMENT_TEXT_START
-            textView.setPadding(10,0,0,0)
+            textView.setPadding(10, 0, 0, 0)
         }
         textView.text = objectQuestions.text
     }
-    private fun getBitmap(imageName:String, progressBar: ProgressBar, position: Int) {
+    private fun getBitmap(imageName: String, progressBar: ProgressBar, position: Int) {
         val imageView = view.findViewById<ImageView>(R.id.imageView)
         if(hasConnection()) {
             if(getItem(position)?.idBitmapFlag!!)
