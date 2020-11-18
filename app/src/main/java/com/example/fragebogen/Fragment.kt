@@ -21,6 +21,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import java.lang.Exception
 
 
 class Fragment(private var mas: ArrayList<ArrayList<ObjectQuestions>>, private var count:Int, private var contextA:Context, private var student:StudentClass) : Fragment() {
@@ -198,7 +199,7 @@ class Fragment(private var mas: ArrayList<ArrayList<ObjectQuestions>>, private v
             }
         }else{
             val editText = getViewByPosition(1, listView)?.findViewById<EditText>(R.id.editText)
-            val imm = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            val imm = contextA.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(view?.windowToken, 0)
             editText?.isFocusable = false
             editText?.isLongClickable = false
