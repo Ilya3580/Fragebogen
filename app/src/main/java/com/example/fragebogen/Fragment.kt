@@ -4,12 +4,16 @@ import android.content.Context
 import android.content.res.Resources
 import android.graphics.Color
 import android.net.ConnectivityManager
+import android.opengl.GLES32
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.renderscript.ScriptGroup
+import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.annotation.RequiresApi
