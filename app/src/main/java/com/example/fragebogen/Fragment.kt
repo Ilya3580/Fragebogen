@@ -54,7 +54,6 @@ class Fragment(private var mas: ArrayList<ArrayList<ObjectQuestions>>, private v
     var timer = object: CountDownTimer(time.toLong(), 1) {
         override fun onTick(millisUntilFinished: Long) {
             progressBarLitle.progress = millisUntilFinished.toInt()
-
         }
 
         override fun onFinish() {
